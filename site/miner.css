@@ -1,0 +1,55 @@
+
+body {
+	font-family: sans-serif;
+	background:       white;
+}
+
+h1, h2, h3 {    
+	color: #000099;
+	border-bottom: 1px solid black;
+}
+
+b.logo {    
+	color: #000099;
+}
+
+HPlogo {
+	border: none;
+}
+
+p {
+	color: black;
+	border: 25px;
+	line-height: 25px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+p.rss, pre.rss, li.rss {
+	color: black;
+	border: 25px;
+	line-height: 25px;
+	margin-right: auto;
+	margin-left: auto;
+	margin-bottom: 25px;
+}
+
+p.web, pre.web {
+	color: #CC6600;
+	border: 25px;
+	line-height: 20px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+pre {
+	color: #000099;
+	border: 25px;
+	white-space: pre-wrap;       /* css-3 */
+	white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+	white-space: -pre-wrap;      /* Opera 4-6 */
+	white-space: -o-pre-wrap;    /* Opera 7 */
+	word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	margin-right: auto;
+	margin-left: auto;
+}

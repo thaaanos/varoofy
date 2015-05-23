@@ -1,0 +1,17 @@
+Tools used in text mining
+	histogram.py is used to look at a text and generate a word count
+	and percentage use table.  It ignores http and sentence punctuation,
+ 	all words are lowecased.  Finally, histogram ignores the words in
+	the stopwords.txt file.
+
+	One use that was interesting was to generate a stream of all the
+	words in the files analyzed and then focus on the words that are
+	interesting for knowledge mining.  From this list you can then
+	look at the data and create a table of false and true counts, to
+	prove your guess that a given word is a true positive.
+
+	stopwords.txt is a list of words to be ignored from reporting using
+	histogram.py  The stopwords were derived from this web site:
+	http://www.webconfs.com/stop-words.php and are Copyright 2005-2006
+	webconfs.com 
+
