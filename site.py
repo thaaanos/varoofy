@@ -7,7 +7,8 @@
     Licensed under the apache lincense, see LICENSE.md
 
 """
-
+import collector_database
+import rss_collector
 
 def main ():
     """ test the classes

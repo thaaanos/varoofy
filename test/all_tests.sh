@@ -8,3 +8,36 @@ then
 else
     echo "Version failed"
 fi
+
+# test miner
+../miner.py > /dev/null
+if [ $? ]
+then
+    echo "miner passed"
+else
+    echo "miner failed"
+fi
+
+../site.py > /dev/null
+if [ $? ]
+then
+    echo "site passed"
+else
+    echo "site failed"
+fi
+
+../collector_database/collector_database.py > /dev/null
+if [ $? ]
+then
+    echo "collector_database passed"
+else
+    echo "collector_database failed"
+fi
+
+../rss_collector/rss_collector.py > /dev/null
+if [ $? ]
+then
+    echo "rss_collector passed"
+else
+    echo "rss_collector failed"
+fi
