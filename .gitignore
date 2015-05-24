@@ -1,0 +1,4 @@
+*.pyc
+tools
+tools/*
+project_plan.txt

@@ -8,6 +8,8 @@
 
 """
 
+import collector_database
+import rss_collector
 
 def main ():
     """ test the classes
