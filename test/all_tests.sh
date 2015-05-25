@@ -19,12 +19,12 @@ else
     echo "miner failed"
 fi
 
-../site.py > /dev/null
+../miner_site.py > /dev/null
 if [ $? ]
 then
-    echo "site passed"
+    echo "miner site passed"
 else
-    echo "site failed"
+    echo "miner site failed"
 fi
 
 ../miner/collector_database.py > /dev/null
