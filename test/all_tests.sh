@@ -1,5 +1,7 @@
 #!/bin/sh 
 
+PYTHONPATH=$PYTHONPATH:../miner:
+
 # test harness for main programs and features
 ../version.py > /dev/null
 if [ $? ]
@@ -9,7 +11,6 @@ else
     echo "Version failed"
 fi
 
-# test miner
 ../miner.py > /dev/null
 if [ $? ]
 then
