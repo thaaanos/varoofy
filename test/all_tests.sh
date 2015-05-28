@@ -2,8 +2,16 @@
 
 PYTHONPATH=$PYTHONPATH:../miner:
 
+if [ "$1" == "-d" ]
+then
+    echo "debug"
+    debug="/dev/stdout"
+else
+    debug="/dev/null"
+fi
+
 # test harness for main programs and features
-../version.py > /dev/null
+../version.py > "$debug"
 if [ $? ]
 then
     echo "Version passed"
@@ -11,23 +19,23 @@ else
     echo "Version failed"
 fi
 
-../miner.py > /dev/null
+../miner/mine.py > "$debug"
 if [ $? ]
 then
-    echo "miner passed"
+    echo "mine passed"
 else
-    echo "miner failed"
+    echo "mine failed"
 fi
 
-../miner_site.py > /dev/null
+../miner/mine_site.py > "$debug"
 if [ $? ]
 then
-    echo "miner site passed"
+    echo "mine_site passed"
 else
-    echo "miner site failed"
+    echo "mine_site failed"
 fi
 
-../miner/collector_database.py > /dev/null
+../miner/collector_database.py > "$debug"
 if [ $? ]
 then
     echo "collector_database passed"
@@ -35,7 +43,7 @@ else
     echo "collector_database failed"
 fi
 
-../miner/rss_collector.py > /dev/null
+../miner/rss_collector.py > "$debug"
 if [ $? ]
 then
     echo "rss_collector passed"

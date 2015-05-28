@@ -25,7 +25,6 @@ class rss_collector:
         self.db = collector_database
         try:
             self.db = self.db(self)
-            self.db.do_config
         except Exception, evalue:
             print "rss_collector: db.collector_database, do_config: %s" % (evalue,)
             sys.exit(1)
@@ -34,6 +33,13 @@ class rss_collector:
     def set_rss_data(self, rss_data=None):
         """ insert rss data into database
         """
+        self.sql = r"""
+        insert into rss_data values (rss_data) % r'vvv';
+        """
+        for each in rss_data:
+            data = self.sql.replace('vvv', str(each))
+            self.db.execute(data)
+        self.db.commit()
         return True
 
     def get_rss_data(self):

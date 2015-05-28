@@ -8,8 +8,8 @@
 
 """
 
-import miner.collector_database
-import miner.rss_collector
+import collector_database
+import rss_collector
 
 def main ():
     """ test the classes
