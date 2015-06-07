@@ -2,7 +2,7 @@
 """
     _____ is part of the miner project
 
-    (c) Mark Menkhus, 2015 
+    (c) Mark Menkhus, 2015
 
     Licensed under the apache lincense, see LICENSE.md
 
@@ -13,8 +13,8 @@ import collector_database
 
 
 class rss_collector:
-    """ rss_collector: contains the methods to use rss and isolates 
-        form the implementation of the collector database
+    """ rss_collector: contains the methods to use rss and isolates
+        from the implementation of the collector database
 
         depends on collector_database
     """
@@ -49,7 +49,8 @@ class rss_collector:
         """
         return True
 
-def main ():
+
+def main():
     """ test the classes
     """
     rss_collection = rss_collector

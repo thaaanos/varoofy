@@ -10,6 +10,7 @@
 
 import sys
 import sqlite3
+import re
 
 
 class collector_database:
@@ -18,38 +19,32 @@ class collector_database:
         defends on sqlite3 database
         depends on configuration
     """
-    def __init__(self):
+    def __init__(self, database='/usr/local/miner/miner.db'):
         """ setup class for first use
         """
         self.conn = None
         self.cursor = None
-        self.database = '/usr/local/miner/minder.db'
-        self.miner_state = {}
+        self.database = database
+        self.miner_config = None
         try:
             """ open the database using Sqlite3, setup a connection
             and establish the SQL cursor
             """
             self.conn = sqlite3.connect(self.database)
             self.cursor = self.conn.cursor()
-            self.set_config()
         except Exception, e:
             print "collector_database.__init__: %s" % (e,)
             sys.exit(1)
-        try:
-            self.do_config(config_version=1, purpose="security miner", pace=12,
-                           directory='/usr/local/miner', initiation_date="27 May 2015",
-                           wrap_around=False, topic_index=False)
-        except Exception, evalue:
-            print "collector_database, do_config: %s" % (evalue,)
-            sys.exit(1)
         return None
 
-    def set_config(self):
+    def setup_database(self):
         """ set config items for database, over ride defaults
 
             set the schema for config, rss and mail
         """
         # sort unique items, based on date first, then CVSS score
+        # change the text information inserted into the database to
+        # document your database as you see fit.
         self.sql = r"""
         create table version (
         database_author text,
@@ -62,8 +57,10 @@ class collector_database:
         values (
         'Mark Menkhus, mark.menkhus@gmail.com',
         '1.0',
-        'May 25, 2015'
-        'This database was created for the miner project to collect rss mail etc.'
+        '7-jun-2015',
+        'This database was created for the miner project to collect rss mail etc.
+        This miner project is for my information security use, but you can purpose this
+        for whatever you like.'
         );
         create table rss_feeds (
         rss_id text not null,
@@ -94,69 +91,71 @@ class collector_database:
         );
         create table miner_configuration (
         config_id text,
-        miner_version text,
-        miner_purpose text,
-        miner_pace text,
-        miner_directory text,
-        miner_initiation_date text,
-        miner_wrap_around text,
-        miner_topical_index text
+        version text,
+        purpose text,
+        pace text,
+        directory text,
+        initiation_date text,
+        wrap_around text,
+        topical_index text
         );
+        insert into miner_configuration
+        (version, purpose, pace, directory, initiation_date, wrap_around,
+         topical_index)
+        values
+        ('.1', 'miner template values', '24', '/usr/local/miner','7-jun-2015',
+         'False', 'None');
         """
-        self.data = self.cursor.execute(self.sql)
-        self.commit()
+        try:
+            self.data = self.cursor.executescript(self.sql)
+            self.conn.commit()
+        except Exception, error:
+            print "collector_database: setup_database: %s" % (error,)
+            return False
         return True
 
     def get_config(self):
         """ return configuration
+
+            get the most recent configuration
         """
-        self.state_query = r"select * from miner_configuration order by config_id\
+        state_query = r"select * from miner_configuration order by config_id\
         desc limit 1;"
-        self.state = self.cursor.execute(self.state_query)
-        self.miner_state['version'] = self.state[0]
-        self.miner_state['purpose'] = self.state[1]
-        self.miner_state['pace'] = self.state[2]
-        self.miner_state['directory'] = self.state[3]
-        self.miner_state['initiation_date'] = self.state[4]
-        self.miner_state['wrap_around'] = self.state[5]
-        self.miner_state['topic_index'] = self.state[6]
-        return True
+        try:
+            state = self.cursor.execute(state_query)
+        except Exception, error:
+            print "collector_database: get_config: %s" % (error,)
+            return False
+        self.miner_config['version'] = state[0]
+        self.miner_config['purpose'] = state[1]
+        self.miner_config['pace'] = state[2]
+        self.miner_config['directory'] = state[3]
+        self.miner_config['initiation_date'] = state[4]
+        self.miner_config['wrap_around'] = state[5]
+        self.miner_config['topic_index'] = state[6]
+        return self.miner_config
 
     def do_config(self, config_version=1, purpose="security miner", pace=12,
-                  directory='/usr/local/miner', initiation_date="27 May 2015",
-                  wrap_around=False, topic_index=False):
+                  directory='/usr/local/miner', initiation_date="06-Jun-2015",
+                  wrap_around=False, topic_index=None):
         """ setup the class based on the stored configuration
         """
-        self.state_query = r"insert into miner_configuration values "
-        self.miner_state['version'] = config_version
-        self.miner_state['purpose'] = purpose
-        self.miner_state['pace'] = pace
-        self.miner_state['directory'] = directory
-        self.miner_state['initiation_date'] = initiation_date
-        self.miner_state['wrap_around'] = wrap_around
-        self.miner_state['topic_index'] = topic_index
-        return self.miner_state
-
-    def _get_rss_schema(self):
-        """ get the internal rss schema for use in the class
-        """
-        return True
-
-    def _set_rss_schema(self):
-        """ set the schema for use in the database, this is not
-        mutable, rather part of the implementation
-        """
-        return True
-
-    def _get_mail_schema(self):
-        """ get the internal rss schema for use in the class
-        """
-        return True
-
-    def _set_mail_schema(self):
-        """ set the schema for use in the database, this is not
-        mutable, rather part of the implementation
-        """
+        state_sql = "insert into miner_configuration \
+        (version, purpose, pace, directory, initiation_date, wrap_around,\
+         topical_index) values ("
+        state_sql += r"'" + config_version + "', "
+        state_sql += r"'" + purpose + "', "
+        state_sql += r"'" + pace + "', "
+        state_sql += r"'" + directory + "', "
+        state_sql += r"'" + initiation_date + "', "
+        state_sql += r"'" + wrap_around + "', "
+        state_sql += r"'" + topic_index + "') ;"
+        try:
+            self.cursor.execute(state_sql)
+            self.conn.commit()
+        except Exception, error:
+            print "collector_database: get_config: %s" % (error,)
+            return False
         return True
 
     def get_feed(self):
@@ -167,16 +166,44 @@ class collector_database:
         self.sql = """
         select rss_feed from rss_feeds;
         """
-        self.rss_feed = self.cursor.execute(self.sql)
-        self.rss_feed = self.rss.findall()
+        try:
+            self.rss_feed = self.cursor.execute(self.sql)
+            self.rss_feed = self.rss_feed.fetchall()
+        except Exception, error:
+            print "collector_database: get_feed: %s" % (error,)
+            print "Initializing database and restarting"
+            self.setup_database()
+            sys.exit(1)
         return self.rss_feed
 
-    def set_feed(self):
+    def valid_rss_feed(self, item=''):
+        """ is the item a URL and does it look URLish?
+        """
+        if re.search(item, r'^http', re.IGNORECASE):
+            return True
+        else:
+            return False
+
+    def set_feed(self, item="http://some.rss.item/rss.xml"):
         """ insert rss feed url into collection
 
             depends on string rss feed
             does not depend on validity of rss feed url
         """
+        item = item.strip('\n')
+        item = item.strip(' ')
+        if self.valid_rss_feed(item):
+            rss_feed_sql = r"insert into rss_feeds (rss_item) values ("
+            rss_feed_sql += r"'" + item + r"');"
+            try:
+                self.data = self.cursor.execute(rss_feed_sql)
+                self.conn.commit()
+            except Exception, error:
+                print "collector_database: set_feed: failed while inserting\
+                into database: %s" % (error)
+                return False
+        else:
+            return False
         return True
 
     def get_rss_data(self):
@@ -188,16 +215,38 @@ class collector_database:
         self.sql = """
         select * from rss_data;
         """
-        self.rss_data = self.cursor.execute(self.sql)
-        self.rss_data = self.rss.findall()
-        return self.rss_data
+        try:
+            rss_data = self.cursor.execute(self.sql)
+            rss_data = self.rss.findall()
+        except Exception, error:
+            print "collector_database: get_rss_data: %s" % (error,)
+            return False
+        return rss_data
 
-    def set_rss_data(self):
+    def set_rss_data(self, data=None):
         """ insert rss data into collection
 
             depends on dict of zero or more rss items
             does not depend on correctness of rss data
+
         """
+        sql = r"""
+        insert into rss_data values (rss_data) '
+        """
+
+        if data:
+            for each in data:
+                sql += each + each + r"';"
+            try:
+                self.cursor.execute(sql)
+            except Exception, error:
+                print "collector_database: set_rss_data during insert: %s" % (error,)
+                return False
+        try:
+            self.conn.commit()
+        except Exception, error:
+            print "collector_database: set_rss_data during commit: %s" % (error,)
+            return False
         return True
 
 
@@ -208,7 +257,7 @@ def main():
     database = collector_database
     database = database()
     print "get_feed %s" % (database.get_feed())
-    if database.set_feed('http://this.geed.com/feed.xml'):
+    if database.set_feed('http://this.feed.com/feed.xml'):
         print "set_feed passed"
     else:
         print "set_feed failed"

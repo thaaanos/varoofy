@@ -4,3 +4,4 @@ tools/*
 project_plan.txt
 env
 build
+path_fixup.sh
