@@ -11,6 +11,7 @@ else
 fi
 
 # test harness for main programs and features
+echo "* version test:"
 ../version.py > "$debug"
 if [ $? ]
 then
@@ -19,6 +20,7 @@ else
     echo "Version failed"
 fi
 
+echo "* miner.py test:"
 ../miner/mine.py > "$debug"
 if [ $? ]
 then
@@ -27,6 +29,7 @@ else
     echo "mine failed"
 fi
 
+echo "* mine_site.py test:"
 ../miner/mine_site.py > "$debug"
 if [ $? ]
 then
@@ -35,6 +38,7 @@ else
     echo "mine_site failed"
 fi
 
+echo "* collector_database test:"
 ../miner/collector_database.py > "$debug"
 if [ $? ]
 then
@@ -43,6 +47,7 @@ else
     echo "collector_database failed"
 fi
 
+echo "* rss_collector.py test:"
 ../miner/rss_collector.py > "$debug"
 if [ $? ]
 then

@@ -45,7 +45,7 @@ class collector_database:
         # sort unique items, based on date first, then CVSS score
         # change the text information inserted into the database to
         # document your database as you see fit.
-        self.sql = r"""
+        sql = r"""
         create table version (
         database_author text,
         database_version text,
@@ -63,23 +63,25 @@ class collector_database:
         for whatever you like.'
         );
         create table rss_feeds (
-        rss_id text not null,
+        rss_id text,
         rss_feed text
         );
+        insert into rss_feeds (rss_feed) values
+        ('http://www.slashdot.org/rss.xml');
         create table rss_stats (
         rss_id text not null references rss_feeds (rss_id),
         rss_lastread text,
         rss_lastsuccess text
         );
         create table rss_data (
-        rss_data_id text not null,
-        rss_id text not null references rss_feeds (rss_id),
+        rss_data_id text,
+        rss_id text references rss_feeds (rss_id),
         rss_item_guid text,
         rss_date text,
         rss_data text
         );
         create table rss_topic (
-        rss_data_id text not null references rss_data (rss_data_id),
+        rss_data_id text references rss_data (rss_data_id),
         filter_id text,
         topic_extract_type text,
         topic_extract text
@@ -99,7 +101,7 @@ class collector_database:
         wrap_around text,
         topical_index text
         );
-        insert into miner_configuration
+       insert into miner_configuration
         (version, purpose, pace, directory, initiation_date, wrap_around,
          topical_index)
         values
@@ -107,7 +109,7 @@ class collector_database:
          'False', 'None');
         """
         try:
-            self.data = self.cursor.executescript(self.sql)
+            self.data = self.cursor.executescript(sql)
             self.conn.commit()
         except Exception, error:
             print "collector_database: setup_database: %s" % (error,)
@@ -171,7 +173,7 @@ class collector_database:
             self.rss_feed = self.rss_feed.fetchall()
         except Exception, error:
             print "collector_database: get_feed: %s" % (error,)
-            print "Initializing database and restarting"
+            print "Since this is first use, please execute again."
             self.setup_database()
             sys.exit(1)
         return self.rss_feed
@@ -179,7 +181,7 @@ class collector_database:
     def valid_rss_feed(self, item=''):
         """ is the item a URL and does it look URLish?
         """
-        if re.search(item, r'^http', re.IGNORECASE):
+        if re.search(r'^http', item, re.IGNORECASE):
             return True
         else:
             return False
@@ -193,7 +195,7 @@ class collector_database:
         item = item.strip('\n')
         item = item.strip(' ')
         if self.valid_rss_feed(item):
-            rss_feed_sql = r"insert into rss_feeds (rss_item) values ("
+            rss_feed_sql = r"insert into rss_feeds (rss_feed) values ("
             rss_feed_sql += r"'" + item + r"');"
             try:
                 self.data = self.cursor.execute(rss_feed_sql)
@@ -203,6 +205,7 @@ class collector_database:
                 into database: %s" % (error)
                 return False
         else:
+            print "collector_database: set_feed: could not insert %s into db" % (item,)
             return False
         return True
 
@@ -216,12 +219,13 @@ class collector_database:
         select * from rss_data;
         """
         try:
-            rss_data = self.cursor.execute(self.sql)
-            rss_data = self.rss.findall()
+            ret_data = []
+            for each in self.cursor.execute(self.sql):
+                ret_data.append(each)
         except Exception, error:
             print "collector_database: get_rss_data: %s" % (error,)
             return False
-        return rss_data
+        return ret_data
 
     def set_rss_data(self, data=None):
         """ insert rss data into collection
@@ -230,23 +234,17 @@ class collector_database:
             does not depend on correctness of rss data
 
         """
-        sql = r"""
-        insert into rss_data values (rss_data) '
-        """
-
         if data:
             for each in data:
-                sql += each + each + r"';"
+                sql = r"insert into rss_data (rss_data) values ('"
+                sql += each + r"');"
             try:
-                self.cursor.execute(sql)
+                self.cursor.executescript(sql)
+                self.conn.commit()
             except Exception, error:
                 print "collector_database: set_rss_data during insert: %s" % (error,)
+                print "the failing sql statement: %s" % (sql,)
                 return False
-        try:
-            self.conn.commit()
-        except Exception, error:
-            print "collector_database: set_rss_data during commit: %s" % (error,)
-            return False
         return True
 
 
@@ -254,16 +252,21 @@ def main():
     """ test the collector_database classes
 
     """
+    rss_item = {}
     database = collector_database
     database = database()
-    print "get_feed %s" % (database.get_feed())
+    if database.get_feed():
+        print "get_feed PASSED"
+    else:
+        print "get_feed: FAILED"
+        sys.exit(1)
     if database.set_feed('http://this.feed.com/feed.xml'):
         print "set_feed passed"
     else:
         print "set_feed failed"
         sys.exit(1)
     print "get_rss_data: %s" % (database.get_rss_data(),)
-    rss_item = ['item']['this is an item']
+    rss_item = ['this is an item']
     if database.set_rss_data(rss_item):
         print "set_rss_data passed"
     else:
