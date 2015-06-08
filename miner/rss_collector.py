@@ -4,7 +4,7 @@
 
     (c) Mark Menkhus, 2015
 
-    Licensed under the apache lincense, see LICENSE.md
+    Licensed under the apache license, see LICENSE.md
 
 """
 
@@ -22,24 +22,22 @@ class rss_collector:
     def __init__(self):
         """ setup class for first use
         """
-        self.db = collector_database
         try:
-            self.db = self.db(self)
-        except Exception, evalue:
-            print "rss_collector: db.collector_database, do_config: %s" % (evalue,)
+            self.db = collector_database()
+        except Exception, error:
+            print "rss_collector.__init__ %s" % (error,)
             sys.exit(1)
-        return True
+        return None
 
     def set_rss_data(self, rss_data=None):
         """ insert rss data into database
         """
-        self.sql = r"""
-        insert into rss_data values (rss_data) % r'vvv';
-        """
         for each in rss_data:
-            data = self.sql.replace('vvv', str(each))
-            self.db.execute(data)
-        self.db.commit()
+            try:
+                self.db.set_rss_data(each)
+            except Exception, error:
+                print "rss_collector.set_rss_data: %s" % (error,)
+                sys.exit(1)
         return True
 
     def get_rss_data(self):
@@ -47,23 +45,34 @@ class rss_collector:
 
         depends on collector_database and methods
         """
-        return True
+        rss_data = []
+        for each in self.db.get_rss_data():
+            rss_data.append(each)
+        return rss_data
 
 
 def main():
     """ test the classes
     """
-    rss_collection = rss_collector
-    rss_collection = rss_collection()
-    if rss_collection.set_rss_data():
+    try:
+        rss_collection = rss_collector
+    except Exception, error:
+        print "main test in rss_collection: rss_collector %" % (error,)
+    #rss_collection = rss_collection()
+    try:
+        rss_collection.set_rss_data(['this is some data'])
         print "rss_collection.set_rss_data passed"
-    else:
-        print "rss_collection.set_rss_data failed"
-    rss_data = rss_collection.get_rss_data()
-    if rss_data:
+    except Exception, error:
+        print "rss_collection.set_rss_data %s" % (error,)
+        sys.exit(1)
+    try:
+        rss_data = rss_collection.get_rss_data()
         print "rss_collection.get_rss_data passed"
-    else:
-        print "rss_collection.get_rss_data failed"
+        for each in rss_data:
+            print each
+    except Exception, error:
+        print "rss_collection.get_rss_data %s" % (error,)
+        sys.exit(1)
     exit()
 
 

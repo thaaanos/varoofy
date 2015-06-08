@@ -4,7 +4,7 @@
 
     (c) Mark Menkhus, 2015
 
-    Licensed under the apache lincence, see LICENSE.md
+    Licensed under the apache license, see LICENSE.md
 
 """
 
@@ -16,7 +16,7 @@ import re
 class collector_database:
     """ collector_database: contains the methods to use the database
 
-        defends on sqlite3 database
+        depends on sqlite3 database
         depends on configuration
     """
     def __init__(self, database='/usr/local/miner/miner.db'):
@@ -145,13 +145,13 @@ class collector_database:
         state_sql = "insert into miner_configuration \
         (version, purpose, pace, directory, initiation_date, wrap_around,\
          topical_index) values ("
-        state_sql += r"'" + config_version + "', "
+        state_sql += r"'" + str(config_version) + "', "
         state_sql += r"'" + purpose + "', "
-        state_sql += r"'" + pace + "', "
+        state_sql += r"'" + str(pace) + "', "
         state_sql += r"'" + directory + "', "
         state_sql += r"'" + initiation_date + "', "
-        state_sql += r"'" + wrap_around + "', "
-        state_sql += r"'" + topic_index + "') ;"
+        state_sql += r"'" + str(wrap_around) + "', "
+        state_sql += r"'" + str(topic_index) + "') ;"
         try:
             self.cursor.execute(state_sql)
             self.conn.commit()
@@ -255,6 +255,9 @@ def main():
     rss_item = {}
     database = collector_database
     database = database()
+    database.do_config(config_version=1, purpose="security miner", pace=12,
+                       directory='/usr/local/miner', initiation_date="06-Jun-2015",
+                       wrap_around=False, topic_index=None)
     if database.get_feed():
         print "get_feed PASSED"
     else:
